@@ -1,25 +1,17 @@
-# Use the official Python image from Docker Hub
+# Use an official Python runtime as a parent image
 FROM python:3.9-slim
-
-# Set the working directory inside the container
+ 
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy the current directory contents into the container
 COPY . /app
 
-# Copy the .env file into the container (if you have it in your project)
-COPY .env /app/.env
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install the dependencies from requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Expose ports for both services
+EXPOSE 8000 8501
 
-# Expose port 8501 for Streamlit app
-EXPOSE 8501
-
-# Set the environment variable for Streamlit to run
-ENV STREAMLIT_SERVER_HEADLESS=true
-
-# Command to run the app (start Streamlit for the frontend and FastAPI for the backend)
-CMD ["streamlit", "run", "your_streamlit_app.py"]  # Update with your Streamlit app filename
-
+# Command to run both FastAPI and Streamlit
+CMD ["sh", "-c", "uvicorn server:app --host 0.0.0.0 --port 8000 & streamlit run main.py --server.port 8501"]
